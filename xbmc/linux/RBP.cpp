@@ -42,6 +42,7 @@ CRBP::~CRBP()
 
 bool CRBP::Initialize()
 {
+  printf("%s\n", __func__);
   m_initialized = m_DllBcmHost->Load();
   if(!m_initialized)
     return false;
@@ -51,6 +52,7 @@ bool CRBP::Initialize()
   m_omx_initialized = m_OMX->Initialize();
   if(!m_omx_initialized)
     return false;
+  m_omx_initted.Set();
 
   char response[80] = "";
   m_arm_mem = 0;
@@ -63,6 +65,11 @@ bool CRBP::Initialize()
   g_OMXImage.Initialize();
   m_omx_image_init = true;
   return true;
+}
+
+void CRBP::WaitForOMXInit()
+{
+  m_omx_initted.Wait();
 }
 
 void CRBP::LogFirmwareVerison()
