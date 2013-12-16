@@ -243,10 +243,14 @@ void OMXPlayerVideo::ProcessOverlays(double pts)
     double pts2 = pOverlay->bForced ? pts : pts - m_iSubtitleDelay;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     if((pOverlay->iPTSStartTime <= pts2 && (pOverlay->iPTSStopTime > pts2 || pOverlay->iPTSStopTime == 0LL))/* || pts == 0*/)
 =======
     if((pOverlay->iPTSStartTime <= pts2 && (pOverlay->iPTSStopTime > pts2 || pOverlay->iPTSStopTime == 0LL)))
 >>>>>>> 59c0ea55d1b650e8920752f881f4307baa4438d0
+=======
+    if((pOverlay->iPTSStartTime <= pts2 && (pOverlay->iPTSStopTime > pts2 || pOverlay->iPTSStopTime == 0LL)) || pts == 0)
+>>>>>>> parent of 600daa7... subtitles fix
     {
       if(pOverlay->IsOverlayType(DVDOVERLAY_TYPE_GROUP))
         overlays.insert(overlays.end(), static_cast<CDVDOverlayGroup*>(pOverlay)->m_overlays.begin()
@@ -304,8 +308,13 @@ void OMXPlayerVideo::Output(double pts, bool bDropPacket)
   double time = subtitle_pts != DVD_NOPTS_VALUE ? subtitle_pts - media_pts : 0.0;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
   //if (m_nextOverlay != DVD_NOPTS_VALUE)
   //  media_pts = m_nextOverlay;
+=======
+  if (m_nextOverlay != DVD_NOPTS_VALUE)
+    media_pts = m_nextOverlay;
+>>>>>>> parent of 600daa7... subtitles fix
 
 =======
 >>>>>>> 59c0ea55d1b650e8920752f881f4307baa4438d0
@@ -763,3 +772,4 @@ void OMXPlayerVideo::ResolutionUpdateCallBack(void *ctx, uint32_t width, uint32_
   OMXPlayerVideo *player = static_cast<OMXPlayerVideo*>(ctx);
   player->ResolutionUpdateCallBack(width, height, display_aspect);
 }
+
