@@ -61,7 +61,7 @@ public:
   float GetCacheTime();
   float GetCacheTotal();
   COMXAudio();
-  bool Initialize(AEAudioFormat format, OMXClock *clock, CDVDStreamInfo &hints, uint64_t channelMap, bool bUsePassthrough, bool bUseHWDecode);
+  bool Initialize(AEAudioFormat format, OMXClock *clock, CDVDStreamInfo &hints, uint64_t channelMap, bool bUsePassthrough, bool bUseHWDecode, bool is_live);
   bool PortSettingsChanged();
   ~COMXAudio();
 
@@ -98,7 +98,6 @@ public:
   bool BadState() { return !m_Initialized; };
   unsigned int GetAudioRenderingLatency();
   float GetMaxLevel(double &pts);
-  void VizPacket(const void* data, unsigned int len, double pts);
 
   void BuildChannelMap(enum PCMChannels *channelMap, uint64_t layout);
   int BuildChannelMapCEA(enum PCMChannels *channelMap, uint64_t layout);
@@ -135,19 +134,9 @@ private:
   int           m_extrasize;
   // stuff for visualisation
   double        m_last_pts;
-  int           m_vizBufferSize;
-  uint8_t       *m_vizBuffer;
-  int           m_vizRemapBufferSize;
-  uint8_t       *m_vizRemapBuffer;
-  CAERemap      m_vizRemap;
   bool          m_submitted_eos;
   bool          m_failed_eos;
-  typedef struct {
-    int num_samples;
-    float samples[VIS_PACKET_SIZE];
-    double pts;
-  } vizblock_t;
-  std::queue<vizblock_t> m_vizqueue;
+  bool          m_live;
 
   typedef struct {
     double pts;

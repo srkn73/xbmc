@@ -14883,6 +14883,21 @@ msgctxt "#36546"
 msgid "Sets the visual depth of subtitles for stereoscopic videos. The higher the value, the closer the subtitles will appear to the viewer."
 msgstr ""
 
+#: system/settings/rbp.xml
+msgctxt "#36547"
+msgid "Use higher quality textures for covers and fanart"
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#36548"
+msgid "Limits resolution of GUI to save memory. Does not affect video playback. Use 1080 for unlimited. Requires restart."
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#36549"
+msgid "Enable for live tv and VoD streams"
+msgstr ""
+
 #empty strings from id 36547 to 36999
 #reserved strings 365XX
 
@@ -14946,4 +14961,18 @@ msgstr ""
 #: system/settings/settings.xml
 msgctxt "#37019"
 msgid "Enables system keys like printscreen, alt-tab and volume keys when in fullscreen"
+
+#: system/settings/rbp.xml
+msgctxt "#37020"
+msgid "Enable 32 bit textures"
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#37021"
+msgid "Set GUI resolution limit"
+msgstr ""
+
+#: system/settings/rbp.xml
+msgctxt "#37022"
+msgid "Enable fixed latency playback mode"
 msgstr ""

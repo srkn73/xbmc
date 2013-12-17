@@ -37,6 +37,7 @@
 #if defined(TARGET_RASPBERRY_PI)
 #include "DllBCM.h"
 #include "OMXCore.h"
+#include "threads/Thread.h"
 
 class CRBP
 {
@@ -53,6 +54,7 @@ public:
   // stride can be null for packed output
   unsigned char *CaptureDisplay(int width, int height, int *stride, bool swap_red_blue, bool video_only = true);
   DllOMX *GetDllOMX() { return m_OMX ? m_OMX->GetDll() : NULL; }
+  void WaitForOMXInit();
 
 private:
   DllBcmHost *m_DllBcmHost;
@@ -63,6 +65,7 @@ private:
   int        m_gpu_mem;
   COMXCore   *m_OMX;
   class DllLibOMXCore;
+  CEvent     m_omx_initted;
 };
 
 extern CRBP g_RBP;

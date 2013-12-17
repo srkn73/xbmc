@@ -78,6 +78,7 @@ OMXPlayerAudio::OMXPlayerAudio(OMXClock *av_clock, CDVDMessageQueue& parent)
   m_nChannels     = 0;
   m_DecoderOpen   = false;
   m_bad_state     = false;
+  m_live          = false;
   m_hints_current.Clear();
 
   bool small_mem = g_RBP.GetArmMem() < 256;
@@ -511,12 +512,12 @@ AEDataFormat OMXPlayerAudio::GetDataFormat(CDVDStreamInfo hints)
   /* check our audio capabilties */
 
   /* pathrought is overriding hw decode*/
-  if(hints.codec == AV_CODEC_ID_AC3 && CAEFactory::SupportsRaw(AE_FMT_AC3))
+  if(hints.codec == AV_CODEC_ID_AC3 && CAEFactory::SupportsRaw(AE_FMT_AC3) && !CSettings::Get().GetBool("audiooutput.dualaudio"))
   {
     dataFormat = AE_FMT_AC3;
     m_passthrough = true;
   }
-  if(hints.codec == AV_CODEC_ID_DTS && CAEFactory::SupportsRaw(AE_FMT_DTS))
+  if(hints.codec == AV_CODEC_ID_DTS && CAEFactory::SupportsRaw(AE_FMT_DTS) && !CSettings::Get().GetBool("audiooutput.dualaudio"))
   {
     dataFormat = AE_FMT_DTS;
     m_passthrough = true;
@@ -573,7 +574,7 @@ bool OMXPlayerAudio::OpenDecoder()
     // we just want to get the channel count right to stop OMXAudio.cpp rejecting stream
     // the actual layout is not used
     channelMap = (1<<m_nChannels)-1;
-  bool bAudioRenderOpen = m_omxAudio.Initialize(m_format, m_av_clock, m_hints, channelMap, m_passthrough, m_hw_decode);
+  bool bAudioRenderOpen = m_omxAudio.Initialize(m_format, m_av_clock, m_hints, channelMap, m_passthrough, m_hw_decode, m_live);
 
   m_codec_name = "";
   m_bad_state  = !bAudioRenderOpen;
