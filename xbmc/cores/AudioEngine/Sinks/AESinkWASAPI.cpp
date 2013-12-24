@@ -375,44 +375,6 @@ void CAESinkWASAPI::Deinitialize()
   m_bufferPtr = 0;
 }
 
-bool CAESinkWASAPI::IsCompatible(const AEAudioFormat &format, const std::string &device)
-{
-  if (!m_initialized || m_isDirty)
-    return false;
-
-  u_int notCompatible         = 0;
-  const u_int numTests        = 5;
-  std::string strDiffBecause ("");
-  static const char* compatibleParams[numTests] = {":Devices",
-                                                   ":Channels",
-                                                   ":Sample Rates",
-                                                   ":Data Formats",
-                                                   ":Passthrough Formats"};
-
-  notCompatible = (notCompatible  +!((AE_IS_RAW(format.m_dataFormat)  == AE_IS_RAW(m_encodedFormat))        ||
-                                     (!AE_IS_RAW(format.m_dataFormat) == !AE_IS_RAW(m_encodedFormat))))     << 1;
-  notCompatible = (notCompatible  +!((sinkReqFormat                   == format.m_dataFormat)               &&
-                                     (sinkRetFormat                   == m_format.m_dataFormat)))           << 1;
-  notCompatible = (notCompatible  + !(format.m_sampleRate             == m_format.m_sampleRate))            << 1;
-  notCompatible = (notCompatible  + !(format.m_channelLayout.Count()  == m_format.m_channelLayout.Count())) << 1;
-  notCompatible = (notCompatible  + !(m_device                        == device));
-
-  if (!notCompatible)
-  {
-    CLog::Log(LOGDEBUG, __FUNCTION__": Formats compatible - reusing existing sink");
-    return true;
-  }
-
-  for (int i = 0; i < numTests ; i++)
-  {
-    strDiffBecause += (notCompatible & 0x01) ? (std::string) compatibleParams[i] : "";
-    notCompatible    = notCompatible >> 1;
-  }
-
-  CLog::Log(LOGDEBUG, __FUNCTION__": Formats Incompatible due to different %s", strDiffBecause.c_str());
-  return false;
-}
-
 double CAESinkWASAPI::GetDelay()
 {
   if (!m_initialized)
@@ -431,22 +393,6 @@ double CAESinkWASAPI::GetDelay()
     delay = 0.0;
 
   return delay;
-}
-
-double CAESinkWASAPI::GetCacheTime()
-{
-  /* This function deviates from the defined usage due to the event-driven */
-  /* mode of WASAPI utilizing twin buffers which are written to in single  */
-  /* buffer chunks. Therefore the buffers are either 100% full or 50% full */
-  /* At 50% issues arise with water levels in the stream and player. For   */
-  /* this reason the cache is shown as 100% full at all times, and control */
-  /* of the buffer filling is assumed in AddPackets() and by the WASAPI    */
-  /* implementation of the WaitforSingleObject event indicating one of the */
-  /* buffers is ready for filling via AddPackets                           */
-  if (!m_initialized)
-    return 0.0;
-
-  return m_sinkLatency;
 }
 
 double CAESinkWASAPI::GetCacheTotal()
@@ -1017,18 +963,9 @@ bool CAESinkWASAPI::InitializeExclusive(AEAudioFormat &format)
 {
   WAVEFORMATEXTENSIBLE_IEC61937 wfxex_iec61937;
   WAVEFORMATEXTENSIBLE &wfxex = wfxex_iec61937.FormatExt;
-  bool obsolete71Wide = false;
 
   if (format.m_dataFormat <= AE_FMT_FLOAT)
-  {
     BuildWaveFormatExtensible(format, wfxex);
-    // handle obsolete 7.1 wide
-    if (wfxex.dwChannelMask == KSAUDIO_SPEAKER_7POINT1)
-    {
-      obsolete71Wide = true;
-      wfxex.dwChannelMask = KSAUDIO_SPEAKER_7POINT1_SURROUND;
-    }
-  }
   else
     BuildWaveFormatExtensibleIEC61397(format, wfxex_iec61937);
 
@@ -1146,22 +1083,7 @@ bool CAESinkWASAPI::InitializeExclusive(AEAudioFormat &format)
 
 initialize:
 
-  // check if 7.1 wide was requested and we were able to open 8 channels
-  if (obsolete71Wide && (wfxex.dwChannelMask == KSAUDIO_SPEAKER_7POINT1_SURROUND))
-  {
-    // build layout for 7.1 Wide and map it into KSAUDIO_SPEAKER_7POINT1_SURROUND
-    m_channelLayout.Reset();
-    m_channelLayout += AE_CH_FLOC;  // FLOC/FROC go into FL/FR
-    m_channelLayout += AE_CH_FROC;
-    m_channelLayout += AE_CH_FC;
-    m_channelLayout += AE_CH_LFE;
-    m_channelLayout += AE_CH_FL;    // FL/FR go into SL/SR
-    m_channelLayout += AE_CH_FR;
-    m_channelLayout += AE_CH_BL;
-    m_channelLayout += AE_CH_BR;
-  }
-  else
-    AEChannelsFromSpeakerMask(wfxex.dwChannelMask);
+  AEChannelsFromSpeakerMask(wfxex.dwChannelMask);
   format.m_channelLayout = m_channelLayout;
 
   /* When the stream is raw, the values in the format structure are set to the link    */

@@ -51,12 +51,6 @@ static enum AEChannel ALSAChannelMap51Wide[ALSA_MAX_CHANNELS + 1] = {
   AE_CH_NULL
 };
 
-static enum AEChannel ALSAChannelMap71Wide[ALSA_MAX_CHANNELS + 1] = {
-  AE_CH_FLOC    , AE_CH_FROC    , AE_CH_BL      , AE_CH_BR      , AE_CH_FC      , AE_CH_LFE     , AE_CH_FL        , AE_CH_FR        ,
-  AE_CH_UNKNOWN1, AE_CH_UNKNOWN2, AE_CH_UNKNOWN3, AE_CH_UNKNOWN4, AE_CH_UNKNOWN5, AE_CH_UNKNOWN6, AE_CH_UNKNOWN7, AE_CH_UNKNOWN8, /* for p16v devices */
-  AE_CH_NULL
-};
-
 static enum AEChannel ALSAChannelMapPassthrough[ALSA_MAX_CHANNELS + 1] = {
   AE_CH_RAW     , AE_CH_RAW     , AE_CH_RAW     , AE_CH_RAW     , AE_CH_RAW     , AE_CH_RAW     , AE_CH_RAW      , AE_CH_RAW      ,
   AE_CH_UNKNOWN1, AE_CH_UNKNOWN2, AE_CH_UNKNOWN3, AE_CH_UNKNOWN4, AE_CH_UNKNOWN5, AE_CH_UNKNOWN6, AE_CH_UNKNOWN7, AE_CH_UNKNOWN8, /* for p16v devices */
@@ -125,10 +119,6 @@ inline CAEChannelInfo CAESinkALSA::GetChannelLayout(AEAudioFormat format, unsign
     if (format.m_channelLayout.HasChannel(AE_CH_SL) && !format.m_channelLayout.HasChannel(AE_CH_BL))
     {
       channelMap = ALSAChannelMap51Wide;
-    }
-    else if (maxChannels >= 8 && format.m_channelLayout.HasChannel(AE_CH_FLOC) && !format.m_channelLayout.HasChannel(AE_CH_SL))
-    {
-      channelMap = ALSAChannelMap71Wide;
     }
     for (unsigned int c = 0; c < 8; ++c)
     {
@@ -263,17 +253,6 @@ bool CAESinkALSA::Initialize(AEAudioFormat &format, std::string &device)
   m_formatSampleRateMul = 1.0 / (double)m_format.m_sampleRate;
 
   return true;
-}
-
-bool CAESinkALSA::IsCompatible(const AEAudioFormat &format, const std::string &device)
-{
-  return (
-      /* compare against the requested format and the real format */
-      (m_initFormat.m_sampleRate    == format.m_sampleRate    || m_format.m_sampleRate    == format.m_sampleRate   ) &&
-      (m_initFormat.m_dataFormat    == format.m_dataFormat    || m_format.m_dataFormat    == format.m_dataFormat   ) &&
-      (m_initFormat.m_channelLayout == format.m_channelLayout || m_format.m_channelLayout == format.m_channelLayout) &&
-      (m_initDevice == device)
-  );
 }
 
 snd_pcm_format_t CAESinkALSA::AEFormatToALSAFormat(const enum AEDataFormat format)
@@ -534,28 +513,6 @@ double CAESinkALSA::GetDelay()
   }
 
   return (double)frames * m_formatSampleRateMul;
-}
-
-double CAESinkALSA::GetCacheTime()
-{
-  if (!m_pcm)
-    return 0.0;
-
-  int space = snd_pcm_avail_update(m_pcm);
-  if (space == 0)
-  {
-    snd_pcm_state_t state = snd_pcm_state(m_pcm);
-    if (state < 0)
-    {
-      HandleError("snd_pcm_state", state);
-      space = m_bufferSize;
-    }
-
-    if (state != SND_PCM_STATE_RUNNING && state != SND_PCM_STATE_PREPARED)
-      space = m_bufferSize;
-  }
-
-  return (double)(m_bufferSize - space) * m_formatSampleRateMul;
 }
 
 double CAESinkALSA::GetCacheTotal()

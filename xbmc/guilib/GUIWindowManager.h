@@ -204,6 +204,32 @@ private:
   bool m_initialized;
 
   CDirtyRegionTracker m_tracker;
+
+private:
+  class CGUIWindowManagerIdCache
+  {
+  public:
+    CGUIWindowManagerIdCache(void) : m_id(WINDOW_INVALID) {}
+    CGUIWindow *Get(int id)
+    {
+      if (id == m_id)
+        return m_window;
+      return NULL;
+    }
+    void Set(int id, CGUIWindow *window)
+    {
+      m_id = id;
+      m_window = window;
+    }
+    void Invalidate(void)
+    {
+      m_id = WINDOW_INVALID;
+    }
+  private:
+    int m_id;
+    CGUIWindow *m_window;
+  };
+  mutable CGUIWindowManagerIdCache m_idCache;
 };
 
 /*!
