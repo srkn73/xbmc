@@ -2262,6 +2262,11 @@
           </dependencies>
           <control type="toggle" />
         </setting>
+        <setting id="audiooutput.ac3transcode" type="boolean" label="40000" help="40001">
+          <level>2</level>
+          <default>true</default>
+          <control type="toggle" />
+        </setting>
         <setting id="audiooutput.normalizelevels" type="boolean" label="346" help="36533">
           <level>2</level>
           <default>true</default>

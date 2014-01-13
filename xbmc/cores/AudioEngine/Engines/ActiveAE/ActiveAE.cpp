@@ -1336,6 +1336,7 @@ void CActiveAE::ApplySettingsToFormat(AEAudioFormat &format, AudioSettings &sett
   }
   // transcode
   else if (settings.channels <= AE_CH_LAYOUT_2_0 && // no multichannel pcm
+           CSettings::Get().GetBool("audiooutput.ac3transcode") &&
            settings.passthrough &&
            settings.ac3passthrough &&
            !m_streams.empty() &&
