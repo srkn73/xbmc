@@ -54,12 +54,14 @@ private:
   AEAudioFormat        m_initFormat;
   AEAudioFormat        m_format;
   unsigned int         m_sinkbuffer_size;  ///< total size of the buffer
+  unsigned int         m_sinkbuffer_padded_size;  ///< total size of the padded buffer
   double               m_sinkbuffer_sec_per_byte;
   static CAEDeviceInfo m_info;
   bool                 m_Initialized;
   uint32_t             m_submitted;
   OMX_AUDIO_PARAM_PCMMODETYPE m_pcm_input;
   COMXCoreComponent    m_omx_render;
+  unsigned int         m_padded_pitch;
 };
 
 #endif
